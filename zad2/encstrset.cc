@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <sstream>
-#include <immintrin.h>
 
 using std::unordered_map;
 using std::unordered_set;
@@ -25,7 +24,11 @@ namespace{
     const bool _debug = true;
 #endif
 
-unordered_map<unsigned long, StringSet> setCollection;
+unordered_map<unsigned long, StringSet>& setCollection(){
+    static unordered_map<unsigned long, StringSet> map;
+    return map;
+}
+
 unsigned long freeId = 0;
 
 // Overload some streams operators for logging operations
@@ -35,6 +38,10 @@ unsigned long freeId = 0;
 template <typename T>
 ostream& operator<=(ostream& s, T a){
     if(_debug){
+        // This is to resolve static initialization order fiasco - cerr may be not initialized
+        // when some encstrset_*() function is called from static context of another file.
+        // We only include this line in this overload because it is always called first.
+        static std::ios_base::Init initObj;
         s << a;
     }
     return s;
@@ -106,7 +113,7 @@ unsigned long jnp1::encstrset_new(){
     cerr <= "encstrset_new" <= "()" <= endl;
 
     StringSet s; 
-    setCollection[freeId] = s;
+    setCollection()[freeId] = s;
 
     cerr <= "encstrset_new: set #" <= freeId <= " created" <= endl;
     return freeId++;
@@ -115,7 +122,7 @@ unsigned long jnp1::encstrset_new(){
 void jnp1::encstrset_delete(unsigned long id){
     cerr <= "encstrset_delete" <= "(" <= id <= ")" <= endl;
 
-    if(setCollection.erase(id) > 0){
+    if(setCollection().erase(id) > 0){
         cerr <= "encstrset_delete: set #" <= id <= " deleted" <= endl;
     } else {
         cerr <= "encstrset_insert: set #" <= id <= " does not exist" <= endl;
@@ -126,8 +133,8 @@ void jnp1::encstrset_delete(unsigned long id){
 size_t jnp1::encstrset_size(unsigned long id){
     cerr <= "encstrset_size" <= "(" <= id <= ")" <= endl;
 
-    auto setIt = setCollection.find(id);
-    if(setIt == setCollection.end()){
+    auto setIt = setCollection().find(id);
+    if(setIt == setCollection().end()){
         cerr <= "encstrset_size: set #" <= id <= " does not exist" <= endl;
         return 0;
     }
@@ -140,8 +147,8 @@ size_t jnp1::encstrset_size(unsigned long id){
 bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key){
     cerr <= "encstrset_insert" <= "(" <= id <= ", " <= &value <= ", " <= &key <= ")" <= endl;
 
-    auto setIt = setCollection.find(id);    
-    if(setIt == setCollection.end()){
+    auto setIt = setCollection().find(id);    
+    if(setIt == setCollection().end()){
         cerr <= "encstrset_insert: set #" <= id <= " does not exist" <= endl;
         return false;
     }
@@ -171,8 +178,8 @@ bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key
 bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key){
     cerr <= "encstrset_remove" <= "(" <= id <= ", " <= &value <= ", " <= &key <= ")" <= endl;
     
-    auto setIt = setCollection.find(id);  
-    if(setIt == setCollection.end()){
+    auto setIt = setCollection().find(id);  
+    if(setIt == setCollection().end()){
         cerr <= "encstrset_remove: set #" <= id <= " does not exist" <= endl;
         return false;
     }
@@ -202,8 +209,8 @@ bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key
 bool jnp1::encstrset_test(unsigned long id, const char* value, const char* key){
     cerr <= "encstrset_test" <= "(" <= id <= ", " <= &value <= ", " <= &key <= ")" <= endl;
     
-    auto setIt = setCollection.find(id);  
-    if(setIt == setCollection.end()){
+    auto setIt = setCollection().find(id);  
+    if(setIt == setCollection().end()){
         cerr <= "encstrset_test: set #" <= id <= " does not exist" <= endl;
         return false;
     }
@@ -233,8 +240,8 @@ bool jnp1::encstrset_test(unsigned long id, const char* value, const char* key){
 void jnp1::encstrset_clear(unsigned long id){
     cerr <= "encstrset_clear" <= "(" <= id <= ")" <= endl;
 
-    auto setIt = setCollection.find(id);
-    if(setIt == setCollection.end()){
+    auto setIt = setCollection().find(id);
+    if(setIt == setCollection().end()){
         cerr <= "encstrset_clear: set #" <= id <= " does not exist" <= endl;
         return;
     }
@@ -246,14 +253,14 @@ void jnp1::encstrset_clear(unsigned long id){
 void jnp1::encstrset_copy(unsigned long src_id, unsigned long dst_id){
     cerr <= "encstrset_copy" <= "(" <= src_id <= ", " <= dst_id <= ")" <= endl;
 
-    auto srcSetIt = setCollection.find(src_id);
-    if(srcSetIt == setCollection.end()){
+    auto srcSetIt = setCollection().find(src_id);
+    if(srcSetIt == setCollection().end()){
         cerr <= "encstrset_copy: set #" <= src_id <= " does not exist" <= endl;
         return;
     }
 
-    auto dstSetIt = setCollection.find(dst_id);
-    if(dstSetIt == setCollection.end()){
+    auto dstSetIt = setCollection().find(dst_id);
+    if(dstSetIt == setCollection().end()){
         cerr <= "encstrset_copy: set #" <= dst_id <= " does not exist" <= endl;
         return;
     }
