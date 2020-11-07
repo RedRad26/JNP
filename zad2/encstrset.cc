@@ -1,6 +1,7 @@
 #include "encstrset.h"
 
 #include <iostream>
+#include <iomanip>
 #include <unordered_map>
 #include <unordered_set>
 #include <sstream>
@@ -100,7 +101,7 @@ string printCypher(const string& encryptedString){
     stringstream ss;
     ss << std::hex << std::uppercase << '"';
     for(char c: encryptedString){
-        ss << (unsigned int)c << ' ';
+        ss << std::setw(2) << std::setfill('0') << (unsigned int)c << ' ';
     }
     string ret = ss.str();
     ret.back() = '"';
