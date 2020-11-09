@@ -69,11 +69,15 @@ string xorEncrypt(const char* value, const char* key){
 string printCypher(const string& encryptedString){
     stringstream ss;
     ss << std::hex << std::uppercase << '"';
-    for(char c: encryptedString){
-        ss << std::setw(2) << std::setfill('0') << (unsigned int)c << ' ';
+    auto sep = "";
+
+    for (char c: encryptedString) {
+        ss << sep << std::setw(2) << std::setfill('0') << (unsigned int) c;
+        sep = " ";
     }
+
+    ss << '"';
     string ret = ss.str();
-    ret.back() = '"';
     return ret;
 }
 
@@ -82,7 +86,7 @@ string printCypher(const string& encryptedString){
 unsigned long jnp1::encstrset_new(){
     error_stream << "encstrset_new" << "()" << endl;
 
-    StringSet s; 
+    StringSet s;
     setCollection()[freeId] = s;
 
     error_stream << "encstrset_new: set #" << freeId << " created" << endl;
@@ -95,9 +99,9 @@ void jnp1::encstrset_delete(unsigned long id){
     if(setCollection().erase(id) > 0){
         error_stream << "encstrset_delete: set #" << id << " deleted" << endl;
     } else {
-        error_stream << "encstrset_insert: set #" << id << " does not exist" << endl;
+        error_stream << "encstrset_delete: set #" << id << " does not exist" << endl;
     }
-    
+
 }
 
 size_t jnp1::encstrset_size(unsigned long id){
@@ -122,7 +126,7 @@ bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key
         return false;
     }
 
-    auto setIt = setCollection().find(id);    
+    auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
         error_stream << "encstrset_insert: set #" << id << " does not exist" << endl;
         return false;
@@ -142,13 +146,13 @@ bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key
 
 bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key){
     error_stream << "encstrset_remove" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
-    
+
     if(value == nullptr){
         error_stream << "encstrset_remove: invalid value (NULL)" << endl;
         return false;
     }
 
-    auto setIt = setCollection().find(id);  
+    auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
         error_stream << "encstrset_remove: set #" << id << " does not exist" << endl;
         return false;
@@ -168,13 +172,13 @@ bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key
 
 bool jnp1::encstrset_test(unsigned long id, const char* value, const char* key){
     error_stream << "encstrset_test" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
-    
+
     if(value == nullptr){
         error_stream << "encstrset_test: invalid value (NULL)" << endl;
         return false;
     }
 
-    auto setIt = setCollection().find(id);  
+    auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
         error_stream << "encstrset_test: set #" << id << " does not exist" << endl;
         return false;

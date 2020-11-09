@@ -29,7 +29,7 @@ namespace jnp1{
     void encstrset_clear(unsigned long id);
 
     void encstrset_copy(unsigned long src_id, unsigned long dst_id);
-    
+
 #ifdef __cplusplus
     }
 }
