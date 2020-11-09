@@ -36,6 +36,15 @@ ostream& err() {
 
 #define error_stream if (!_debug) {} else err()
 
+ostream& operator<<(ostream& stream, const char ** c){
+    if(*c){
+        stream << '"' << *c << '"';
+    } else {
+        stream << "NULL";
+    }
+    return stream;
+}
+
 unsigned long freeId = 0;
 
 // Alias for c++ strlen() equivalent
@@ -55,14 +64,6 @@ string xorEncrypt(const char* value, const char* key){
         encrypted += value[i] ^ key[i%keyLength];
     }
     return encrypted;
-}
-
-string toPrintableString(const char* s){
-    if (s == nullptr) {
-        return "NULL";
-    } else {
-        return "\"" + string(s) + "\"";
-    }
 }
 
 string printCypher(const string& encryptedString){
@@ -114,7 +115,7 @@ size_t jnp1::encstrset_size(unsigned long id){
 }
 
 bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key){
-    error_stream << "encstrset_insert" << "(" << id << ", " << toPrintableString(value) << ", " << toPrintableString(key) << ")" << endl;
+    error_stream << "encstrset_insert" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
 
     auto setIt = setCollection().find(id);    
     if(setIt == setCollection().end()){
@@ -140,7 +141,7 @@ bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key
 }
 
 bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key){
-    error_stream << "encstrset_remove" << "(" << id << ", " << toPrintableString(value) << ", " << toPrintableString(key) << ")" << endl;
+    error_stream << "encstrset_remove" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
     
     auto setIt = setCollection().find(id);  
     if(setIt == setCollection().end()){
@@ -166,7 +167,7 @@ bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key
 }
 
 bool jnp1::encstrset_test(unsigned long id, const char* value, const char* key){
-    error_stream << "encstrset_test" << "(" << id << ", " << toPrintableString(value) << ", " << toPrintableString(key) << ")" << endl;
+    error_stream << "encstrset_test" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
     
     auto setIt = setCollection().find(id);  
     if(setIt == setCollection().end()){
