@@ -8,13 +8,19 @@
 using std::unordered_map;
 using std::unordered_set;
 using std::string;
-using std::cout;
-using std::cerr;
-using std::endl;
 using std::ostream;
 using std::stringstream;
 
+using std::cout;
+using std::cerr;
+using std::endl;
+// We also use std::hex, std::uppercase, std::setw and std::setfill but they are used exactly once.
+// They also have quite ambiguous names so we leave std:: prefix to better indicate that they are indeed the library ones.
+// Similarly, we leave std::get as is to better indicate that it is the get extracting values from tuples.
+
+
 using StringSet = unordered_set<string>;
+using SetMap = unordered_map<unsigned long, StringSet>;
 
 namespace{
 
@@ -24,8 +30,8 @@ namespace{
     const bool _debug = true;
 #endif
 
-unordered_map<unsigned long, StringSet>& setCollection(){
-    static unordered_map<unsigned long, StringSet> map;
+SetMap& setCollection(){
+    static SetMap map;
     return map;
 }
 
@@ -53,8 +59,8 @@ const auto& CStringLength = std::char_traits<char>::length;
 // Performs encryption. Assumes not null value.
 string xorEncrypt(const char* value, const char* key){
     string encrypted;
-    if(key == NULL || *key == '\0'){
-        encrypted  = value;
+    if(key == nullptr || *key == '\0'){
+        encrypted = value;
         return encrypted;
     }
     size_t valueLength = CStringLength(value);
