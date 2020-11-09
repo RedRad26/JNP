@@ -117,14 +117,14 @@ size_t jnp1::encstrset_size(unsigned long id){
 bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key){
     error_stream << "encstrset_insert" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
 
-    auto setIt = setCollection().find(id);    
-    if(setIt == setCollection().end()){
-        error_stream << "encstrset_insert: set #" << id << " does not exist" << endl;
+    if(value == nullptr){
+        error_stream << "encstrset_insert: invalid value (NULL)" << endl;
         return false;
     }
 
-    if(value == nullptr){
-        error_stream << "encstrset_insert: invalid value (NULL)" << endl;
+    auto setIt = setCollection().find(id);    
+    if(setIt == setCollection().end()){
+        error_stream << "encstrset_insert: set #" << id << " does not exist" << endl;
         return false;
     }
 
@@ -143,14 +143,14 @@ bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key
 bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key){
     error_stream << "encstrset_remove" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
     
-    auto setIt = setCollection().find(id);  
-    if(setIt == setCollection().end()){
-        error_stream << "encstrset_remove: set #" << id << " does not exist" << endl;
+    if(value == nullptr){
+        error_stream << "encstrset_remove: invalid value (NULL)" << endl;
         return false;
     }
 
-    if(value == nullptr){
-        error_stream << "encstrset_remove: invalid value (NULL)" << endl;
+    auto setIt = setCollection().find(id);  
+    if(setIt == setCollection().end()){
+        error_stream << "encstrset_remove: set #" << id << " does not exist" << endl;
         return false;
     }
 
@@ -169,14 +169,14 @@ bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key
 bool jnp1::encstrset_test(unsigned long id, const char* value, const char* key){
     error_stream << "encstrset_test" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
     
-    auto setIt = setCollection().find(id);  
-    if(setIt == setCollection().end()){
-        error_stream << "encstrset_test: set #" << id << " does not exist" << endl;
+    if(value == nullptr){
+        error_stream << "encstrset_test: invalid value (NULL)" << endl;
         return false;
     }
 
-    if(value == nullptr){
-        error_stream << "encstrset_test: invalid value (NULL)" << endl;
+    auto setIt = setCollection().find(id);  
+    if(setIt == setCollection().end()){
+        error_stream << "encstrset_test: set #" << id << " does not exist" << endl;
         return false;
     }
 
