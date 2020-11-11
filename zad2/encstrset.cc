@@ -40,8 +40,6 @@ ostream& err() {
     return std::cerr;
 }
 
-#define error_stream if (!_debug) {} else err()
-
 
 // We will use this overload to print quoted strings. This avoids the need to create unnecessary temporary strings
 // and allows to keep error messages concise - if c is of type char* it is enough to write
@@ -96,51 +94,51 @@ string printCypher(const string& encryptedString){
 }
 
 unsigned long jnp1::encstrset_new(){
-    error_stream << "encstrset_new" << "()" << endl;
+    if(_debug) err() << "encstrset_new" << "()" << endl;
 
     StringSet s;
     setCollection()[freeId] = s;
 
-    error_stream << "encstrset_new: set #" << freeId << " created" << endl;
+    if(_debug) err() << "encstrset_new: set #" << freeId << " created" << endl;
     return freeId++;
 }
 
 void jnp1::encstrset_delete(unsigned long id){
-    error_stream << "encstrset_delete" << "(" << id << ")" << endl;
+    if(_debug) err() << "encstrset_delete" << "(" << id << ")" << endl;
 
     if(setCollection().erase(id) > 0){
-        error_stream << "encstrset_delete: set #" << id << " deleted" << endl;
+        if(_debug) err() << "encstrset_delete: set #" << id << " deleted" << endl;
     } else {
-        error_stream << "encstrset_delete: set #" << id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_delete: set #" << id << " does not exist" << endl;
     }
 
 }
 
 size_t jnp1::encstrset_size(unsigned long id){
-    error_stream << "encstrset_size" << "(" << id << ")" << endl;
+    if(_debug) err() << "encstrset_size" << "(" << id << ")" << endl;
 
     auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
-        error_stream << "encstrset_size: set #" << id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_size: set #" << id << " does not exist" << endl;
         return 0;
     }
 
     size_t size = setIt->second.size();
-    error_stream << "encstrset_size: set #" << id << " contains " << size << " element(s)" << endl;
+    if(_debug) err() << "encstrset_size: set #" << id << " contains " << size << " element(s)" << endl;
     return size;
 }
 
 bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key){
-    error_stream << "encstrset_insert" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
+    if(_debug) err() << "encstrset_insert" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
 
     if(value == nullptr){
-        error_stream << "encstrset_insert: invalid value (NULL)" << endl;
+        if(_debug) err() << "encstrset_insert: invalid value (NULL)" << endl;
         return false;
     }
 
     auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
-        error_stream << "encstrset_insert: set #" << id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_insert: set #" << id << " does not exist" << endl;
         return false;
     }
 
@@ -148,25 +146,25 @@ bool jnp1::encstrset_insert(unsigned long id, const char* value, const char* key
     string encrypted = xorEncrypt(value, key);
 
     if(std::get<1>(set.insert(encrypted))){
-        error_stream << "encstrset_insert: set #" << id << ", cypher " << printCypher(encrypted) << " inserted" << endl;
+        if(_debug) err() << "encstrset_insert: set #" << id << ", cypher " << printCypher(encrypted) << " inserted" << endl;
         return true;
     } else {
-        error_stream << "encstrset_insert: set #" << id << ", cypher " << printCypher(encrypted) << " was already present" << endl;
+        if(_debug) err() << "encstrset_insert: set #" << id << ", cypher " << printCypher(encrypted) << " was already present" << endl;
         return false;
     }
 }
 
 bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key){
-    error_stream << "encstrset_remove" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
+    if(_debug) err() << "encstrset_remove" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
 
     if(value == nullptr){
-        error_stream << "encstrset_remove: invalid value (NULL)" << endl;
+        if(_debug) err() << "encstrset_remove: invalid value (NULL)" << endl;
         return false;
     }
 
     auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
-        error_stream << "encstrset_remove: set #" << id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_remove: set #" << id << " does not exist" << endl;
         return false;
     }
 
@@ -174,25 +172,25 @@ bool jnp1::encstrset_remove(unsigned long id, const char* value, const char* key
     string encrypted = xorEncrypt(value, key);
 
     if(set.erase(encrypted) > 0){
-        error_stream << "encstrset_remove: set #" << id << ", cypher " << printCypher(encrypted) << " removed" << endl;
+        if(_debug) err() << "encstrset_remove: set #" << id << ", cypher " << printCypher(encrypted) << " removed" << endl;
         return true;
     } else {
-        error_stream << "encstrset_remove: set #" << id << ", cypher " << printCypher(encrypted) << " was not present" << endl;
+        if(_debug) err() << "encstrset_remove: set #" << id << ", cypher " << printCypher(encrypted) << " was not present" << endl;
         return false;
     }
 }
 
 bool jnp1::encstrset_test(unsigned long id, const char* value, const char* key){
-    error_stream << "encstrset_test" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
+    if(_debug) err() << "encstrset_test" << "(" << id << ", " << &value << ", " << &key << ")" << endl;
 
     if(value == nullptr){
-        error_stream << "encstrset_test: invalid value (NULL)" << endl;
+        if(_debug) err() << "encstrset_test: invalid value (NULL)" << endl;
         return false;
     }
 
     auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
-        error_stream << "encstrset_test: set #" << id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_test: set #" << id << " does not exist" << endl;
         return false;
     }
 
@@ -200,39 +198,39 @@ bool jnp1::encstrset_test(unsigned long id, const char* value, const char* key){
     string encrypted = xorEncrypt(value, key);
 
     if(set.find(encrypted) != set.end()){
-        error_stream << "encstrset_test: set #" << id << ", cypher " << printCypher(encrypted) << " is present" << endl;
+        if(_debug) err() << "encstrset_test: set #" << id << ", cypher " << printCypher(encrypted) << " is present" << endl;
         return true;
     } else {
-        error_stream << "encstrset_test: set #" << id << ", cypher " << printCypher(encrypted) << " is not present" << endl;
+        if(_debug) err() << "encstrset_test: set #" << id << ", cypher " << printCypher(encrypted) << " is not present" << endl;
         return false;
     }
 }
 
 void jnp1::encstrset_clear(unsigned long id){
-    error_stream << "encstrset_clear" << "(" << id << ")" << endl;
+    if(_debug) err() << "encstrset_clear" << "(" << id << ")" << endl;
 
     auto setIt = setCollection().find(id);
     if(setIt == setCollection().end()){
-        error_stream << "encstrset_clear: set #" << id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_clear: set #" << id << " does not exist" << endl;
         return;
     }
 
     setIt->second.clear();
-    error_stream << "encstrset_clear: set #" << id << " cleared" << endl;
+    if(_debug) err() << "encstrset_clear: set #" << id << " cleared" << endl;
 }
 
 void jnp1::encstrset_copy(unsigned long src_id, unsigned long dst_id){
-    error_stream << "encstrset_copy" << "(" << src_id << ", " << dst_id << ")" << endl;
+    if(_debug) err() << "encstrset_copy" << "(" << src_id << ", " << dst_id << ")" << endl;
 
     auto srcSetIt = setCollection().find(src_id);
     if(srcSetIt == setCollection().end()){
-        error_stream << "encstrset_copy: set #" << src_id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_copy: set #" << src_id << " does not exist" << endl;
         return;
     }
 
     auto dstSetIt = setCollection().find(dst_id);
     if(dstSetIt == setCollection().end()){
-        error_stream << "encstrset_copy: set #" << dst_id << " does not exist" << endl;
+        if(_debug) err() << "encstrset_copy: set #" << dst_id << " does not exist" << endl;
         return;
     }
 
@@ -240,9 +238,9 @@ void jnp1::encstrset_copy(unsigned long src_id, unsigned long dst_id){
     StringSet& dstSet = dstSetIt->second;
     for(const string& s: srcSet){
         if(std::get<1>(dstSet.insert(s))){
-            error_stream << "encstrset_copy: cypher " << printCypher(s) << " copied from set #" << src_id << " to set #" << dst_id << endl;
+            if(_debug) err() << "encstrset_copy: cypher " << printCypher(s) << " copied from set #" << src_id << " to set #" << dst_id << endl;
         } else {
-            error_stream << "encstrset_copy: copied cypher " << printCypher(s) << " was already present in set #" << dst_id << endl;
+            if(_debug) err() << "encstrset_copy: copied cypher " << printCypher(s) << " was already present in set #" << dst_id << endl;
         }
     }
 }
