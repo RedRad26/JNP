@@ -42,6 +42,12 @@ ostream& err() {
 
 #define error_stream if (!_debug) {} else err()
 
+
+// We will use this overload to print quoted strings. This avoids the need to create unnecessary temporary strings
+// and allows to keep error messages concise - if c is of type char* it is enough to write
+//      cerr << &c << " rest of the message";
+// and content of c will be quoted. We could not overload << for just char*, because then every literal string in our code
+// would be quoted.
 ostream& operator<<(ostream& stream, const char ** c){
     if(*c){
         stream << '"' << *c << '"';
@@ -77,7 +83,7 @@ string printCypher(const string& encryptedString){
     ss << std::hex << std::uppercase << '"';
     auto sep = "";
 
-    for (char c: encryptedString) {
+    for (unsigned char c: encryptedString) {
         ss << sep << std::setw(2) << std::setfill('0') << (unsigned int) c;
         sep = " ";
     }
