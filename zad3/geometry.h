@@ -3,10 +3,7 @@
 
 #include <vector>
 #include <cstdint>
-#include <cstdlib>
 #include <initializer_list>
-
-#include <iostream>
 
 class Position;
 class Vector;
@@ -61,6 +58,7 @@ public:
     Vector operator+(const Vector& vec) const;
     Rectangle operator+(const Rectangle& rect) const;
     Rectangles operator+(const Rectangles& rect) const;
+    Rectangles operator+(Rectangles&& rect) const;
 
     Vector reflection() const;
 
@@ -100,11 +98,14 @@ class Rectangles{
     private:
     std::vector<Rectangle> storage;
 
-    void addRectangle(Rectangle&& rect);
-
     public:
     Rectangles();
     Rectangles(std::initializer_list<Rectangle> rectangles);
+    Rectangles(const Rectangles&) = default;
+    Rectangles(Rectangles &&);
+
+    Rectangles& operator=(const Rectangles&) = default;
+    Rectangles& operator=(Rectangles &&);
 
     const Rectangle& operator[](size_t i) const;
     Rectangle& operator[](size_t i);
@@ -112,21 +113,14 @@ class Rectangles{
     size_t size() const;
 
     bool operator==(const Rectangles& rects) const;
-    Rectangles& operator+=(const Vector& vec);
-    Rectangles operator+(const Vector& vec) const;
 
+    Rectangles& operator+=(const Vector& vec);
+    Rectangles operator+(const Vector& vec) const &;
+    Rectangles operator+(const Vector& vec) &&;
 };
 
 Rectangle merge_horizontally(const Rectangle& rect1, const Rectangle& rect2);
 Rectangle merge_vertically(const Rectangle& rect1, const Rectangle& rect2);
 Rectangle merge_all(const Rectangles& rectangles);
-
-std::ostream& operator<<(std::ostream& s, const Position& v);
-
-std::ostream& operator<<(std::ostream& s, const Vector& v);
-
-std::ostream& operator<<(std::ostream& s, const Rectangle& r);
-
-std::ostream& operator<<(std::ostream& s, const Rectangles& rs);
 
 #endif /* GEOMETRY_H */

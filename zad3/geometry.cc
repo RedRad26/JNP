@@ -1,5 +1,5 @@
 #include "geometry.h"
-#include <utility>
+
 #include <stdexcept>
 #include <iostream>
 
@@ -19,7 +19,6 @@ namespace{
         return a + b;
     }
 }
-
 
 
 // class AbstractVector2D
@@ -48,9 +47,9 @@ ResultType AbstractVector2D::operator+(const AbstractVector2D& vec) const{
     return ResultType(overflowCheckAdd(xn, vec.xn), overflowCheckAdd(yn, vec.yn));
 }
 
-template <class This>
-This AbstractVector2D::reflection() const{
-    return This(yn, xn);
+template <class ResultType>
+ResultType AbstractVector2D::reflection() const{
+    return ResultType(yn, xn);
 }
 
 
@@ -109,12 +108,15 @@ Position Vector::operator+(const Position& pos) const{
 }
 
 Rectangle Vector::operator+(const Rectangle& rect) const{
-    
     return rect + *this;
 }
 
 Rectangles Vector::operator+(const Rectangles& rectangles) const{
     return rectangles + *this;
+}
+
+Rectangles Vector::operator+(Rectangles&& rectangles) const{
+    return std::move(rectangles += *this);
 }
 
 Vector::operator Position() const{
@@ -130,11 +132,8 @@ Vector Vector::reflection() const{
 // class Rectangle
 
 Rectangle::Rectangle(uint32_t width, uint32_t height, const Position& pos): widthn(width), heightn(height), corner(pos) {
-    if(width == 0){
-        throw std::invalid_argument("Rectangle width must be positive");
-    }
-    if(height == 0){
-        throw std::invalid_argument("Rectangle height must be positive");
+    if(width == 0 || height == 0){
+        throw std::invalid_argument("Rectangle width and height must be positive");
     }
 };
 
@@ -174,24 +173,18 @@ Rectangle Rectangle::operator+(const Vector& vec) const{
 }
 
 bool Rectangle::connectUp(const Rectangle& rect){
-    if (corner.x() == rect.corner.x() &&
-        widthn == rect.widthn &&
-        corner.y() < rect.corner.y() &&
-        rect.corner.y() - corner.y() == heightn){
-            heightn = overflowCheckAdd(heightn, rect.heightn);
-            return true;
+    if (corner + Vector(0, heightn) == rect.corner && widthn == rect.widthn) {
+        heightn = overflowCheckAdd(heightn, rect.heightn);
+        return true;
     } else {
         return false;
     }
 }
 
 bool Rectangle::connectRight(const Rectangle& rect){
-    if (corner.y() == rect.corner.y() &&
-        heightn == rect.heightn &&
-        corner.x() < rect.corner.x() &&
-        rect.corner.x() - corner.x() == widthn){
-            widthn = overflowCheckAdd(widthn, rect.widthn);
-            return true;
+    if (corner + Vector(widthn, 0) == rect.corner && heightn == rect.heightn) {
+        widthn = overflowCheckAdd(widthn, rect.widthn);
+        return true;
     } else {
         return false;
     }
@@ -205,15 +198,24 @@ Rectangles::Rectangles(std::initializer_list<Rectangle> rectangles): storage(rec
 
 Rectangles::Rectangles(): storage() {};
 
-void Rectangles::addRectangle(Rectangle&& r){
-    storage.push_back(r);
+Rectangles::Rectangles(Rectangles &&rectangles) : storage(move(rectangles.storage)) {}
+
+Rectangles &Rectangles::operator=(Rectangles &&r) {
+    storage = move(r.storage);
+    return *this;
 }
 
 Rectangle& Rectangles::operator[](size_t i){
+    if(i >= storage.size()){
+        throw std::invalid_argument("Rectangle index out of bounds");
+    }
     return storage[i];
 }
 
 const Rectangle& Rectangles::operator[](size_t i) const{
+    if(i >= storage.size()){
+        throw std::invalid_argument("Rectangle index out of bounds");
+    }
     return storage[i];
 }
 
@@ -241,19 +243,18 @@ Rectangles& Rectangles::operator+=(const Vector& vec){
     return *this;
 }
     
-Rectangles Rectangles::operator+(const Vector& vec) const{
-    Rectangles ret;
-    for(const auto& r: storage){
-        ret.addRectangle(r + vec);
-    }
-    return ret;
+Rectangles Rectangles::operator+(const Vector& vec) const &{
+    Rectangles ret = *this;
+    return ret += vec;
 }
 
-
+Rectangles Rectangles::operator+(const Vector& vec) &&{
+    return std::move(*this += vec);
+}
 
 // Mergers
 
-Rectangle merge_vertically(const Rectangle& rect1, const Rectangle& rect2){
+Rectangle merge_horizontally(const Rectangle& rect1, const Rectangle& rect2){
     Rectangle copy = rect1;
     if(!copy.connectUp(rect2)){
         throw std::invalid_argument("Rectangles non-mergable");
@@ -261,7 +262,8 @@ Rectangle merge_vertically(const Rectangle& rect1, const Rectangle& rect2){
     return copy;
 }
 
-Rectangle merge_horizontally(const Rectangle& rect1, const Rectangle& rect2){
+
+Rectangle merge_vertically(const Rectangle& rect1, const Rectangle& rect2){
     Rectangle copy = rect1;
     if(!copy.connectRight(rect2)){
         throw std::invalid_argument("Rectangles non-mergable");
@@ -269,9 +271,10 @@ Rectangle merge_horizontally(const Rectangle& rect1, const Rectangle& rect2){
     return copy;
 }
 
+
 Rectangle merge_all(const Rectangles& rectangles){
-    size_t s;
-    if((s = rectangles.size()) == 0){
+    size_t s = rectangles.size();
+    if(s == 0){
         throw std::invalid_argument("Cannot merge empty collection of rectangles");
     }
     Rectangle ret = rectangles[0];
@@ -281,32 +284,4 @@ Rectangle merge_all(const Rectangles& rectangles){
         }
     }
     return ret;
-}
-
-
-
-// For debugging purposes
-
-std::ostream& operator<<(std::ostream& s, const Position& v){
-    s << "(" << v.x() << ", " << v.y() << ")";
-    return s;
-}
-
-std::ostream& operator<<(std::ostream& s, const Vector& v){
-    s << "<" << v.x() << ", " << v.y() << ">";
-    return s;
-}
-
-std::ostream& operator<<(std::ostream& s, const Rectangle& r){
-    s << "{" << r.width() << ", " << r.height() << ", " << r.pos() << "}";
-    return s;
-}
-
-std::ostream& operator<<(std::ostream& s, const Rectangles& rs){
-    s << "[" << std::endl;
-    for(size_t i = 0; i < rs.size(); i++){
-        s << "    " << rs[i] << std::endl;
-    }
-    s << "]";
-    return s;
 }
