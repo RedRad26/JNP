@@ -84,7 +84,7 @@ namespace {
 
     string errorLine(InputLine& line) {
         return "Error in line " + to_string(get<1>(line)) + ": " + get<0>(line);
-    } 
+    }
 
     void manageTransit(Transit& transit) {
         string &carRegistry = get<1>(transit);

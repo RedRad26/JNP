@@ -22,6 +22,7 @@ int main() {
     assert(::jnp1::encstrset_test(id, "testowy", "1538221"));
     assert(!::jnp1::encstrset_test(id, "Testowy", "1538221"));
     assert(!::jnp1::encstrset_test(id, "testowy", ""));
-    //jnp1::encstrset_insert(id, "abcdefghijklmnopqrstuvwxyz", "a");
+    const unsigned char c[] = {250, 251, 252, 253, 254, 255};
+    jnp1::encstrset_insert(id, (char*) c, nullptr);
     ::jnp1::encstrset_delete(id);
 }

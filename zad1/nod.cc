@@ -22,7 +22,7 @@ const regex roadNameRegex(ROAD_NAME_RE);
 
 // Compound type definitions
 
-// All distances are integers, stored in 100s of meters. We assume that program is used on planet Earth and that distances 
+// All distances are integers, stored in 100s of meters. We assume that program is used on planet Earth and that distances
 // are generally smaller than Earth - Sun distance (which is about 148 000 000 km) (with exception of total distance of a road).
 
 /// Combines raw input line with line number
@@ -45,7 +45,7 @@ using EntryEvent = tuple<InputLine, string, int>;
 
 
 
-// Global containers for collected data. Since the program is small and use of 
+// Global containers for collected data. Since the program is small and use of
 // classes/structs is banned this is probably next best approach (especially since
 // whole thing is encapsulated in anonymous namespace).
 
