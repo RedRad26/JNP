@@ -1,5 +1,7 @@
+#ifndef FUNCTION_MAXIMA_H
+#define FUNCTION_MAXIMA_H
+
 #include <set>
-#include <map>
 #include <memory>
 #include <array>
 
@@ -33,9 +35,8 @@ class FunctionMaxima{
     // Konstruktor kopiujący
     FunctionMaxima(const FunctionMaxima& other) = default;
 
-    // Operatory przypisania
-    FunctionMaxima& operator=(const FunctionMaxima& other) = default;
-    FunctionMaxima& operator=(FunctionMaxima&& other) = default;
+    // Operator przypisania
+    FunctionMaxima& operator=(FunctionMaxima other);
 
 
 
@@ -81,9 +82,11 @@ class FunctionMaxima{
     MaxSet maxSet;
     PointSet pointSet;
 
+
     bool isMaximum(iterator point) const;
     bool isMaximumLeftGap(iterator point) const;
     bool isMaximumRightGap(iterator point) const;
+    void swap(FunctionMaxima& other) noexcept;
 
     template <typename SetType, std::size_t maxOps>
     class SetGuard;
@@ -116,8 +119,31 @@ class FunctionMaxima<A, V>::point_type{
         v = std::make_shared<V>(val);
     }
 
+    class PointValueGuard{
+        public:
+        bool reverse = false;
+        point_type* point;  // Raw pointer because we will not be able to initialize a reference in default constructor
+        std::shared_ptr<V> oldValue;
+
+        PointValueGuard() {};
+
+        ~PointValueGuard(){
+            if(reverse){
+                point->v = oldValue;
+            }
+        }
+
+        void commit(){
+            reverse = false;
+        }
+    };
+
     // Changes value in point to copy of given val.
-    void setValue(const V& val){
+    void setValue(PointValueGuard& guard, const V& val){
+        guard.reverse = true;
+        guard.point = this;
+        guard.oldValue = v;
+
         v = std::make_shared<V>(val);
     }
 
@@ -231,6 +257,7 @@ class FunctionMaxima<A, V>::SetGuard{
 
 
 
+
 // Compares point_type objects providing desired maxima ordering
 template <typename A, typename V>
 class FunctionMaxima<A, V>::MaximaComparator{
@@ -253,6 +280,8 @@ class FunctionMaxima<A, V>::MaximaComparator{
 template <typename A, typename V>
 class FunctionMaxima<A, V>::PointArgComparator{
     public:
+    // This allows us to define additional comparators used by find(), lower_bound() etc.
+    // Thanks to that we can search set<point_type> without providing fake point_type - just A is enough
     using is_transparent = void;
     bool operator()(const point_type& p, const point_type& q) const{
         return p.arg() < q.arg();
@@ -265,14 +294,8 @@ class FunctionMaxima<A, V>::PointArgComparator{
     }
 };
 
-template <typename A, typename V>
-const V& FunctionMaxima<A, V>::value_at(const A& a) const{
-    iterator pointIt = find(a);
-    if(pointIt == end()){
-        throw InvalidArg();
-    }
-    return pointIt->value();
-}
+
+
 
 // Checks whether function has maximum in point pointed to by iterator
 template <typename A, typename V>
@@ -345,13 +368,34 @@ bool FunctionMaxima<A, V>::isMaximumRightGap(iterator point) const{
     return true;
 }
 
+template <typename A, typename V>
+void FunctionMaxima<A, V>::swap(FunctionMaxima& other) noexcept{
+    using std::swap;
+    swap(this->pointSet, other.pointSet);
+    swap(this->maxSet, other.maxSet);
+}
 
+template <typename A, typename V>
+FunctionMaxima<A, V>& FunctionMaxima<A, V>::operator=(FunctionMaxima other){
+    this->swap(other);
+    return *this;
+}
+
+template <typename A, typename V>
+const V& FunctionMaxima<A, V>::value_at(const A& a) const{
+    iterator pointIt = find(a);
+    if(pointIt == end()){
+        throw InvalidArg();
+    }
+    return pointIt->value();
+}
 
 template <typename A, typename V>
 void FunctionMaxima<A, V>::set_value(const A& a, const V& v){
-    // Strong exception safety provided by SetGuard
+    // Strong exception safety provided by SetGuard and PointValueGuard
     SetGuard<PointSet, 1> pointSetGuard = {pointSet};
     SetGuard<MaxSet, 4> maxSetGuard = {maxSet};
+    typename point_type::PointValueGuard valueGuard;
 
 
     // Find place where point should be
@@ -363,6 +407,11 @@ void FunctionMaxima<A, V>::set_value(const A& a, const V& v){
         // There are hacks possible to make emplace work, but point_type is quite light so moving it is ok.
         pointSetGuard.insert(it, {a, v});
         it--;  // iterator now points to inserted element
+    } else if (!((v < it->value()) || (it->value() < v))){
+        // If point exists and updated value is the same return early. This fixes incorrect behaviour
+        // caused by fact that SetGuard does not perform operations immediatelly, so erase and insert on
+        // the same element actually deletes that element.
+        return;
     } else {
         // Otherwise remove point from maxSet (as that pair arg-val no longer exists).
         // If point was not a maximum this has no effect (except it might throw on comparison).
@@ -374,7 +423,7 @@ void FunctionMaxima<A, V>::set_value(const A& a, const V& v){
         // Doing that prevents making redundant copies/moves of point_type objects.
         // We could also declare point_type::v mutable but that wouldn't be optimal since
         // maxSet's ordering does depend on values.
-        const_cast<point_type&>(*it).setValue(v);
+        const_cast<point_type&>(*it).setValue(valueGuard, v);
     }
 
     // If point is a maximum insert it's copy into maxSet (if it was a maximum but no longer is
@@ -411,6 +460,7 @@ void FunctionMaxima<A, V>::set_value(const A& a, const V& v){
 
     pointSetGuard.commit();
     maxSetGuard.commit();
+    valueGuard.commit();
 }
 
 template <typename A, typename V>
@@ -488,3 +538,5 @@ template <typename A, typename V>
 typename FunctionMaxima<A, V>::size_type FunctionMaxima<A, V>::size() const noexcept{
     return pointSet.size();
 }
+
+#endif /* FUNCTION_MAXIMA_H */
