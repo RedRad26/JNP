@@ -10,7 +10,7 @@ class InvalidArg: public std::exception{};
 template <typename A, typename V>
 class FunctionMaxima{
     public:
-    // Typ point_type umożliwiający dostęp do "punktów" funkcji
+    // Type providing access to function points
     class point_type;
 
     private:
@@ -21,59 +21,56 @@ class FunctionMaxima{
 
     public:
 
-    // Typ iterujący po punktach funkcji.
+    // Iterates over function's points
     using iterator = typename PointSet::const_iterator;
 
-    // Typ iterujący po lokalnych maksimach funkcji.
+    // Iterates over function's maximas
     using mx_iterator = typename MaxSet::const_iterator;
 
 
 
-    // Tworzy funkcję o pustej dziedzinie
+    // Creates function with empty domain
     FunctionMaxima() = default;
 
-    // Konstruktor kopiujący
     FunctionMaxima(const FunctionMaxima& other) = default;
-
-    // Operator przypisania
     FunctionMaxima& operator=(FunctionMaxima other);
 
 
-
-    // Zwraca wartość w punkcie a, rzuca wyjątek InvalidArg, jeśli a nie
-    // należy do dziedziny funkcji. Złożoność najwyżej O(log n).
+    // Returns function value in point a. Throws InvalidArg if a does not belong 
+    // to function's domain. O(log n) complexity.
     const V& value_at(const A& a) const;
 
-    // Zmienia funkcję tak, żeby zachodziło f(a) = v. Jeśli a nie należy do
-    // obecnej dziedziny funkcji, jest do niej dodawany. Najwyżej O(log n).
+    // Alters function such that f(a) = v. If a does not belong 
+    // to function's domain it's added there. O(log n) complexity.
     void set_value(const A& a, const V& v);
 
-    // Usuwa a z dziedziny funkcji. Jeśli a nie należało do dziedziny funkcji,
-    // nie dzieje się nic. Złożoność najwyżej O(log n).
+    // Deletes a from function's domain. No effect if a does not belong 
+    // to function's domain. O(log n) complexity.
     void erase(const A& a);
 
 
 
-    // iterator wskazujący na pierwszy punkt
+    // Iterator pointing to function's first point
     iterator begin() const noexcept;
 
-    // iterator wskazujący za ostatni punkt
+    // Iterator pointing to past-the-end point
     iterator end() const noexcept;
 
-    // Iterator, który wskazuje na punkt funkcji o argumencie a lub end(),
-    // jeśli takiego argumentu nie ma w dziedzinie funkcji.
+    // Returns iterator, pointing to function's point with argument a or end(),
+    // if there is no such point.
     iterator find(const A& a) const;
 
-    // iterator wskazujący na pierwsze lokalne maksimum
+    // Iterator pointing to function's first local maximum
     mx_iterator mx_begin() const noexcept;
 
-    // iterator wskazujący za ostatnie lokalne maksimum
+    // Iterator pointing past the last local maximum
     mx_iterator mx_end() const noexcept;
 
 
 
     using size_type = typename PointSet::size_type;
 
+    // Returns number of points in function
     size_type size() const noexcept;
     
 
@@ -149,12 +146,12 @@ class FunctionMaxima<A, V>::point_type{
 
     public:
 
-    // Zwraca argument funkcji.
+    // Returns function argument
     const A& arg() const{
         return *a;
     }
 
-    // Zwraca wartość funkcji w tym punkcie.
+    // Returns function value in this point
     const V& value() const{
         return *v;
     }
@@ -417,7 +414,7 @@ void FunctionMaxima<A, V>::set_value(const A& a, const V& v){
         // If point was not a maximum this has no effect (except it might throw on comparison).
         maxSetGuard.erase(*it);
 
-        // Update point with new value. Unfortunatelly std::se::iterator is always const
+        // Update point with new value. Unfortunatelly std::set::iterator is always const
         // (because altering elements could violate ordering) so we have to use const_cast.
         // This is safe because pointSet ordering does not depend on points' values.
         // Doing that prevents making redundant copies/moves of point_type objects.
