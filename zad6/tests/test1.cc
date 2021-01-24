@@ -32,27 +32,21 @@
 
 class A{
     public:
-    std::string s;
-    A() = delete;
-    A(const std::string& s): s(s) {
-        std::cout << "ctor\n" << std::endl;
-    }
-    A(A&& other) = delete;
-    A(const A& other) {
-        std::cout << "copy ctor" << std::endl;
-    }
-    A& operator=(const A& other) = delete;
-    A& operator=(A&& other) = delete;
-    operator A() = delete;
+    int a;
+
+    A(int a): a(a) {}
+    A(const A& other): a(other.a+1) {}
+
 };
 
+A B(const A& a){
+    return A(a);
+}
+
 int main(){
-    A a("aaa");
-    // ???????????????????
-    auto b = A(A(A(A(A(a)))));
-    std::cout << b.s << std::endl;
-    std::cout << a.s << std::endl;
-    
-
-
+    A a(1);
+    auto b = B(B(B(B(a))));
+    auto c = A(A(A(A(a))));
+    std::cout << b.a << std::endl;
+    std::cout << c.a << std::endl;
 }

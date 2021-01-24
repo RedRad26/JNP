@@ -15,7 +15,6 @@ namespace {
 }
 
 int main() {
-    
     auto ooasm_move = program({
         mov(mem(num(0)), num(42))
     });

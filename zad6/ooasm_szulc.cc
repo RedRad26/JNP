@@ -63,10 +63,8 @@ int main() {/*
     });
     Computer computer5(4);
     computer5.boot(ooasm_memmemmem);
-    computer5.memory_dump(std::cout);
     
-    return 0;
-    //assert(memory_dump(computer5) == "1 4 3 0 ");
+    assert(memory_dump(computer5) == "1 4 3 0 ");
 
     auto ooasm_bigger = program({
         inc(mem(lea("aaaaaaaaaa"))),

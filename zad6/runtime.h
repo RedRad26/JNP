@@ -4,6 +4,7 @@
 #include <map>
 #include "memory.h"
 
+// Represents runtime environment of a program.
 class Runtime{
     Memory& memory;
     std::map<std::string, std::size_t> variables;
@@ -23,10 +24,12 @@ class Runtime{
         return memory[addr];
     }
 
+    // Returns memory address of variable with given name casted to 64 signed word.
     int64_t operator[](const std::string& var) const{
         return variables.at(var);
     }
 
+    // Declares variable with varName and initializes it with value. Throws when there is not enough memory for new variable.
     void declareVariable(const std::string& varName, int64_t value){
         variables.insert({varName, variableCount});
         memory[variableCount] = value;

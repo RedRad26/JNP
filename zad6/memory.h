@@ -4,23 +4,24 @@
 #include <cstdint>
 #include <vector>
 #include <ostream>
+#include <exception>
 
 class Memory{
     std::vector<int64_t> mem;
 
     public:
-    Memory(std::size_t size): mem(size) {};
+    Memory(std::size_t size): mem(size) {}; 
 
     int64_t& operator[](int64_t addr){
         if(addr < 0 || (std::size_t) addr >= mem.size()){
-            throw std::out_of_range("Access to negative memory index");
+            throw std::out_of_range("access beyond memory range");
         }
         return mem[addr];
     }
     
     const int64_t& operator[](int64_t addr) const{
         if(addr < 0  || (std::size_t) addr >= mem.size()){
-            throw std::out_of_range("Access to negative memory index");
+            throw std::out_of_range("access beyond memory range");
         }
         return mem[addr];
     }

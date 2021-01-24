@@ -11,7 +11,7 @@
 class VarId: public std::string{
     void checkSize(){
         if(size() < 1 || size() > 10){
-            throw std::invalid_argument("OOAsm identifier must be 1 to 10 characters long.");
+            throw std::invalid_argument("invalid OOAsm identifier (must be 1 to 10 characters long)");
         }
     }
     public:
@@ -28,7 +28,6 @@ class VarId: public std::string{
         checkSize();
     }
 };
-
 
 
 
@@ -90,15 +89,16 @@ class lea: public rvalue{
     }
 };
 
-class mem: public lvalue{
+
+
+class _mem: public lvalue{
     std::unique_ptr<rvalue> addr;
 
-    // mem(mem&& other): addr(std::move(other.addr)) {};
-    mem(std::unique_ptr<rvalue>&& addr): addr(std::move(addr)) {};
+    _mem(_mem&& other): addr(std::move(other.addr)) {}
 
     public:
-    // Crates new mem by reconstructing given rvalue under unique_ptr ownership.
-    mem(rvalue&& addr): addr(std::move(addr).move()) {};
+    // Crates new _mem by reconstructing given rvalue under unique_ptr ownership.
+    _mem(rvalue&& addr): addr(std::move(addr).move()) {}
 
     int64_t& get(Runtime& rt) const override{
         return rt[addr->get(rt)];
@@ -108,14 +108,17 @@ class mem: public lvalue{
         return rt[addr->get(rt)];
     }
 
-    mem* move() && override{
-        return new mem(std::move(addr));
+    _mem* move() && override{
+        return new _mem(std::move(*this));
     }
-
-    //mem* move() && override{
-    //    return new mem(std::move(*this));
-    //}
 };
+
+// This is a workaround because of weird c++ behaviour of nested constructors.
+// For some reason ctor(ctor(ctor(ctor(args)))) calls constructor only once
+// (in fact it produces exact same binary as ctor(args))
+_mem mem(rvalue&& addr){
+    return _mem(std::move(addr));
+}
 
 // Represents all OOAsm instructions that may be included in program.
 class OOAsmInstruction: public NonCopyable{
@@ -178,9 +181,7 @@ class mov: public OOAsmCommand{
     mov(lvalue&& dst, rvalue&& src): dst(std::move(dst).move()), src(std::move(src).move()) {}
 
     virtual void execute(Runtime& rt) const override{
-        auto tmp = src->get(rt);
-        auto& dstt = dst->get(rt);
-        dstt = tmp;
+        dst->get(rt) = src->get(rt);
     }
 
     virtual mov* move() && override{
